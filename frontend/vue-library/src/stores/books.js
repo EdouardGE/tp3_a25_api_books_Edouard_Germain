@@ -65,7 +65,7 @@ export const useBookStore = defineStore('books', () => {
             },
             body: JSON.stringify(updatedData)
         });
-        const result = await response.json();
+    const result = await response.json();
 
         if (!response.ok) {
             throw result;
