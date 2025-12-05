@@ -35,6 +35,9 @@ const auth = useAuthStore()
       </template>
 
       <template v-else>
+        <RouterLink :to="{ name: 'profile' }" class="me-3 py-2 d-inline-block">
+          Profil
+        </RouterLink>
 
         <button class="btn btn-sm btn-outline-danger ms-3" @click="auth.logout()">
           Déconnexion

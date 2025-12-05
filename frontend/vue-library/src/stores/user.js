@@ -73,14 +73,17 @@ export const useUserStore = defineStore('user', () => {
             }
         });
 
+        if (response.status === 204) {
+          if (userId) {
+            users.value = users.value.filter(u => u._id !== userId)
+          }
+          return true
+        }
+
         const result = await response.json();
 
         if (!response.ok) {
             throw result;
-        }
-
-        if (userId) {
-          users.value = users.value.filter(u => u._id !== userId);
         }
         return result;
     }
