@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useAuthStore } from './auth'
 
-const API_URL = import.meta.env?.VITE_API_URL || "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export const useUserStore = defineStore('user', () => {
   const authStore = useAuthStore()
