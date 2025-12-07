@@ -59,6 +59,11 @@ function logout() {
           Profil
         </RouterLink>
 
+        <RouterLink :to="{ name: 'cart' }" class="me-3 py-2 d-inline-block">
+          Panier
+        </RouterLink>
+
+
         <button class="btn btn-sm btn-outline-danger ms-3" @click="logout" :disabled="saving">
           {{ saving ? "Déconnexion..." : "Déconnexion" }}
         </button>

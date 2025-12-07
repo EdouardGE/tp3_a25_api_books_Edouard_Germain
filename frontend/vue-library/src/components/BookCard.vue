@@ -1,7 +1,10 @@
 <script setup>
 
 import { defineProps } from "vue"
-
+import { useBookStore } from '@/stores/books'
+import { useCartStore } from '@/stores/cart'
+import { useRouter } from 'vue-router'
+import { ref } from 'vue'
 
 const props = defineProps({
   book: {
@@ -9,6 +12,35 @@ const props = defineProps({
     required: true
   }
 })
+
+const bookStore = useBookStore()
+const cartStore = useCartStore()
+const router = useRouter()
+
+const loading = ref(true)
+const saving = ref(false)
+const apiError = ref(null)
+const apiSuccess = ref(null)
+
+
+async function addToCart() {
+
+    apiError.value = null
+    apiSuccess.value = null;
+    saving.value = true;
+
+    try {
+        await cartStore.addToCart(props.book._id)
+
+        await bookStore.fetchBooks(1, 4)
+
+        apiSuccess.value = "Livre ajouté au panier avec succès.";
+    } catch (error) {
+        apiError.value = error?.message || "Erreur lors de l'ajout au panier.";
+    } finally {
+        saving.value = false
+    }
+}
 </script>
 
 <template>
@@ -30,6 +62,17 @@ const props = defineProps({
         <strong>Stock :</strong>
         {{ book.quantite > 0 ? book.quantite : "Rupture de stock" }}
         </p>
+
+        <p class="category">
+        <strong>Catégorie :</strong>
+        {{ book.categories?.map(c => c.nom).join(", ") || "Inconnu" }}
+        </p>
+
+        <button @click="addToCart" :disabled="book.quantite <= 0 || saving">
+        {{ saving ? "Ajout au panier..." : "Ajouter au panier" }}
+        </button>
+
+        <p v-if="apiError" class="error">{{ apiError }}</p>
 
     </div>
 </template>

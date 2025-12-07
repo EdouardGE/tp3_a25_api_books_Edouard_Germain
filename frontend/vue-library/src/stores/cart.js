@@ -33,7 +33,7 @@ export const useCartStore = defineStore('cart', () => {
 
     async function updateCartItem(livreId, quantite) {
         const response = await fetch(`${API_URL}/api/panier`, {
-            method: 'PUT',
+            method: 'POST',
             headers: {
                 ...authStore.authHeaders,
                 'Content-Type': 'application/json'

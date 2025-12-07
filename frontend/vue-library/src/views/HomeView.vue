@@ -7,7 +7,6 @@ import BookCard from '@/components/BookCard.vue'
 
 const bookStore = useBookStore()
 
-const books = ref([])
 
 const loading = ref(true)
 const apiError = ref(null)
