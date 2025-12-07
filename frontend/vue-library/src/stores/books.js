@@ -9,7 +9,7 @@ export const useBookStore = defineStore('books', () => {
     const books = ref([])
     const total = computed(() => books.value.length);
 
-    async function fetchBooks(page = 1, limite = 4) {
+    async function fetchBooks(page = 1, limit = 4) {
         const response = await fetch(`${API_URL}/api/livres?page=${page}&limit=${limit}`);
         const result = await response.json();
 
@@ -32,8 +32,8 @@ export const useBookStore = defineStore('books', () => {
             throw result;
         }
 
-        books.value = result;
-        return result;
+        books.value = result.data;
+        return result.pagination;
     }
 
     async function addBook(book) {
