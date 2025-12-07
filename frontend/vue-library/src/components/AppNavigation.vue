@@ -1,8 +1,28 @@
 <script setup>
-import { RouterLink } from 'vue-router'
+  import { ref } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 const auth = useAuthStore()
+const router = useRouter()
+
+const saving = ref(false)
+const apiError = ref(null)
+
+function logout() {
+    apiError.value = null
+    saving.value = true;
+
+    try {
+      auth.logout()
+      router.push({ name: 'login' })
+    } catch (error) {
+      apiError.value = error?.message || "Erreur lors de la déconnexion.";
+    } finally {
+      saving.value = false
+    }
+}
+
 </script>
 
 <template>
@@ -39,8 +59,8 @@ const auth = useAuthStore()
           Profil
         </RouterLink>
 
-        <button class="btn btn-sm btn-outline-danger ms-3" @click="auth.logout()">
-          Déconnexion
+        <button class="btn btn-sm btn-outline-danger ms-3" @click="logout" :disabled="saving">
+          {{ saving ? "Déconnexion..." : "Déconnexion" }}
         </button>
       </template>
 
