@@ -63,6 +63,10 @@ function logout() {
           Panier
         </RouterLink>
 
+        <RouterLink :to="{ name: 'book-create' }" class="me-3 py-2 d-inline-block">
+          Ajouter un livre
+        </RouterLink>
+
 
         <button class="btn btn-sm btn-outline-danger ms-3" @click="logout" :disabled="saving">
           {{ saving ? "Déconnexion..." : "Déconnexion" }}

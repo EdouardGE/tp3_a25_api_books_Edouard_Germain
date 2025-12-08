@@ -8,13 +8,12 @@ import { useRouter } from 'vue-router'
 const auth = useAuthStore()
 const router = useRouter()
 
-const email = ref('')
-const password = ref('')
-
 const form = ref({
   email: '',
   password: ''
 })
+
+
 
 const loading = ref(false)
 const apiError = ref(null)

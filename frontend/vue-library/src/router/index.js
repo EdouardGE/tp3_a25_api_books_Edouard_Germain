@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
 import SignupView from '@/views/SignupView.vue'
 import ProfileView from '@/views/ProfileView.vue'
+import BookCreateView from '@/views/BookCreateView.vue'
 import CartView from '@/views/CartView.vue'
 import { useAuthStore } from '@/stores/auth'
 
@@ -41,7 +42,12 @@ const router = createRouter({
       path: '/cart',
       name: 'cart',
       component: CartView,
-    }
+    },
+    {
+      path: '/book-create',
+      name: 'book-create',
+      component: BookCreateView,
+    },
 
   ],
 })
