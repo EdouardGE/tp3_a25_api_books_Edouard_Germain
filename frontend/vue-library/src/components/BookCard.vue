@@ -35,8 +35,9 @@ async function addToCart() {
         await bookStore.fetchBooks(1, 4)
 
         apiSuccess.value = "Livre ajouté au panier avec succès.";
-    } catch (error) {
-        apiError.value = error?.message || "Erreur lors de l'ajout au panier.";
+    } catch {
+      router.push({ name: 'login' })
+
     } finally {
         saving.value = false
     }
@@ -46,7 +47,7 @@ async function addToCart() {
 <template>
     <div class ="book-card">
 
-        <img class="cover" :src="book.couverture || '/placeholder.png'" :alt="book.titre"/>
+        <img class="cover  object-fit-fill" :src="book.couverture || '/placeholder.png'" :alt="book.titre"/>
         <h3 class="title">{{ book.titre }}</h3>
 
         <p class="authors">
@@ -104,12 +105,18 @@ async function addToCart() {
 
 .authors,
 .price,
-.stock {
+.stock,
+.category {
   font-size: 0.9rem;
+  margin-top: auto;
 }
 
 .stock.out {
   color: red;
   font-weight: bold;
+}
+
+.book-card button {
+  margin-top: auto;
 }
 </style>

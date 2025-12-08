@@ -6,8 +6,21 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export const useBookStore = defineStore('books', () => {
     const authStore = useAuthStore()
+
     const books = ref([])
-    const total = computed(() => books.value.length);
+    const pagination = ref({
+        page: 1,
+        limit: 4,
+        totalPages: 1,
+        totalItems: 0
+    });
+
+    const total = computed(() => pagination.value.totalItems);
+    const currentPage = computed(() => pagination.value.page);
+    const totalPages = computed(() => pagination.value.totalPages);
+    const pageSize = computed(() => pagination.value.limit);
+
+
 
     async function fetchBooks(page = 1, limit = 4) {
         const response = await fetch(`${API_URL}/api/livres?page=${page}&limit=${limit}`);
@@ -18,22 +31,38 @@ export const useBookStore = defineStore('books', () => {
         }
 
         books.value = result.data;
-        return result.pagination;
+        pagination.value = result.pagination;
+
+        return result;
     }
 
     async function searchBooks(query) {
-        if (!query || query.trim() === "") return [];
+        const q = query.trim();
 
-        const response = await fetch(`${API_URL}/api/livres/search?q=${encodeURIComponent(query)}`);
 
+        if (!q) {
+            books.value = [];
+            return [];
+        }
+
+        const response = await fetch(`${API_URL}/api/livres/search?q=${encodeURIComponent(q)}`);
         const result = await response.json();
 
         if (!response.ok) {
             throw result;
         }
 
-        books.value = result.data;
-        return result.pagination;
+        books.value = result;
+        return result;
+    }
+
+    async function getBookById(id) {
+        const response = await fetch(`${API_URL}/api/livres/${id}`);
+        const result = await response.json();
+
+        if (!response.ok) throw result;
+
+        return result;
     }
 
     async function addBook(book) {
@@ -65,7 +94,7 @@ export const useBookStore = defineStore('books', () => {
             },
             body: JSON.stringify(updatedData)
         });
-    const result = await response.json();
+        const result = await response.json();
 
         if (!response.ok) {
             throw result;
@@ -99,8 +128,14 @@ export const useBookStore = defineStore('books', () => {
 
     return {
         books,
+        total,
+        pagination,
+        currentPage,
+        totalPages,
+        pageSize,
         fetchBooks,
         searchBooks,
+        getBookById,
         addBook,
         updateBook,
         deleteBook

@@ -25,6 +25,7 @@ export const useCartStore = defineStore('cart', () => {
         const result = await response.json();
         if (!response.ok) {
             throw result;
+
         }
 
         cartItems.value = result;

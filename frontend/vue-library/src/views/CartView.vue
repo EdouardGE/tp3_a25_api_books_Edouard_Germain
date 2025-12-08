@@ -1,6 +1,8 @@
 <script setup>
 import { useCartStore } from '@/stores/cart'
 import CartItemRow from '@/components/CartItemRow.vue'
+import { ref, onMounted } from 'vue'
+
 
 const cartStore = useCartStore()
 </script>
@@ -8,7 +10,6 @@ const cartStore = useCartStore()
 <template>
   <div>
     <h2>Panier</h2>
-
     <p v-if="cartStore.items.length === 0">Votre panier est vide.</p>
 
     <div v-else>
@@ -20,5 +21,6 @@ const cartStore = useCartStore()
         :item="item"
       />
     </div>
+
   </div>
 </template>

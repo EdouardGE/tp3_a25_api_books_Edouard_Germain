@@ -54,24 +54,29 @@ function logout() {
         </RouterLink>
       </template>
 
-      <template v-else>
-        <RouterLink :to="{ name: 'profile' }" class="me-3 py-2 d-inline-block">
-          Profil
-        </RouterLink>
+      <template v-if="auth.isAdmin">
 
-        <RouterLink :to="{ name: 'cart' }" class="me-3 py-2 d-inline-block">
+
+        <RouterLink :to="{ name: 'nouveau' }" class="me-3 py-2 d-inline-block">
+          Ajouter un livre
+        </RouterLink>
+      </template>
+
+      <template v-if="auth.isAuthenticated">
+        <RouterLink :to="{ name: 'panier' }" class="me-3 py-2 d-inline-block">
           Panier
         </RouterLink>
 
-        <RouterLink :to="{ name: 'book-create' }" class="me-3 py-2 d-inline-block">
-          Ajouter un livre
+        <RouterLink :to="{ name: 'profile' }" class="me-3 py-2 d-inline-block">
+          Profil
         </RouterLink>
-
 
         <button class="btn btn-sm btn-outline-danger ms-3" @click="logout" :disabled="saving">
           {{ saving ? "Déconnexion..." : "Déconnexion" }}
         </button>
       </template>
+
+
 
     </div>
   </nav>

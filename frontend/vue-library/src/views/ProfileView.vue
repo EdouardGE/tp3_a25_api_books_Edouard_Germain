@@ -22,8 +22,10 @@ onMounted(async function () {
   try {
     const data = await userStore.fetchProfile()
     profile.value = data
-  } catch (error) {
-    apiError.value = error?.message || "Impossible de charger le profil.";
+  } catch {
+    router.push({ name: 'login' })
+
+
   } finally {
     loading.value = false
   }
@@ -84,16 +86,24 @@ async function deleteAccount() {
     <p v-if="apiSuccess" class="success">{{ apiSuccess }}</p>
 
     <div v-if="profile && !loading">
-      <h2>Informations</h2>
-      <p><strong>Nom d'utilisateur:</strong> {{ profile.username }}</p>
-      <p><strong>Prénom:</strong> {{ profile.first_name }}</p>
-      <p><strong>Nom:</strong> {{ profile.last_name }}</p>
-      <p><strong>Email:</strong> {{ profile.email }}</p>
-      <img :src="profile.avatar" alt="Avatar" v-if="profile.avatar" />
+      <div class="profile-info mb-4 d-flex justify-content-between align-items-center">
+        <div>
+          <p><strong>{{ profile.username }}</strong> </p>
+          <img :src="profile.avatar" alt="Avatar" v-if="profile.avatar" />
+        </div>
+        <div>
+          <h2>Informations personnelles</h2>
+          <p><strong>Prénom:</strong> {{ profile.first_name }}</p>
+          <p><strong>Nom:</strong> {{ profile.last_name }}</p>
+          <p><strong>Email:</strong> {{ profile.email }}</p>
+        </div>
+      </div>
 
-      <h2>Modifier mon profil</h2>
+      <div class=" mb-4 d-flex justify-content-between ">
+        <div>
+          <h2>Modifier mon profil</h2>
 
-      <form @submit.prevent="updateProfile" class="form-box">
+          <form @submit.prevent="updateProfile" class="form-box">
 
         <div class="field">
           <label>Prénom</label>
@@ -113,26 +123,39 @@ async function deleteAccount() {
         <button type="submit" :disabled="saving">
           {{ saving ? "Sauvegarde..." : "Mettre à jour" }}
         </button>
-      </form>
+          </form>
+        </div>
+        <div class="d-flex flex-column ">
+          <h2>Supprimer mon compte</h2>
+          <button class="danger" @click="deleteAccount" :disabled="saving">
 
-      <h2>Supprimer mon compte</h2>
-      <button class="danger" @click="deleteAccount" :disabled="saving">
-
-        {{ saving ? "Suppression..." : "Supprimer mon compte" }}
-      </button>
-
-
-
-
+            {{ saving ? "Suppression..." : "Supprimer mon compte" }}
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
 .profile-page {
-  max-width: 400px;
+  max-width: 800px;
   margin: 40px auto;
 }
+
+.profile-info{
+  background-color: gray;
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.profile-info img {
+  max-width: 125px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 
 .error {
   color: red;
@@ -160,6 +183,7 @@ async function deleteAccount() {
   border-radius: 6px;
   color: white;
   cursor: pointer;
+  margin-top: auto;
 }
 
 .danger:hover {

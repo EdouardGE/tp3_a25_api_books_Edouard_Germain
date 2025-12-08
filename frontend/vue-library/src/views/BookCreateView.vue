@@ -22,7 +22,7 @@ const form = ref({
   auteurs: [],
   isbn: '',
   prix: null,
-  quantite: 0
+  quantite: 0,
 })
 
 const auteursList = ref([])
@@ -47,6 +47,8 @@ async function createBook() {
 
     try {
       await bookStore.addBook(form.value);
+
+      router.push({ name: 'home' })
       apiSuccess.value = "Livre ajouté avec succès.";
     } catch (error) {
       apiError.value = error?.message || "Erreur lors de l'ajout.";

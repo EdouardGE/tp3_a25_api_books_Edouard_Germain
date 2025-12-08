@@ -39,17 +39,36 @@ const router = createRouter({
       component: ProfileView
     },
     {
-      path: '/cart',
-      name: 'cart',
+      path: '/panier',
+      name: 'panier',
       component: CartView,
+      meta: { requiresAuth: true }
     },
     {
-      path: '/book-create',
-      name: 'book-create',
+      path: '/livres/nouveau',
+      name: 'nouveau',
       component: BookCreateView,
+      meta: { requiresAuth: true, requiresAdmin: true }
     },
 
   ],
+})
+
+router.beforeEach((to, from, next) => {
+  const auth = useAuthStore()
+
+  if (to.meta.requiresAuth && !auth.isAuthenticated) {
+    return next({ name: 'login' })
+  }
+
+
+  if (to.meta.requiresAdmin && !auth.isAdmin) {
+    auth.logout()
+    return next({ name: 'login' })
+  }
+
+
+  next()
 })
 
 export default router
