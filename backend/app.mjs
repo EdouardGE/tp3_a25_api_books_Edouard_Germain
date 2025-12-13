@@ -18,7 +18,6 @@ import panierRoutes from './routes/panier.mjs';
 dotenvFlow.config();
 const app = express();
 
-// const port = process.env.PORT ?? 3000;
 
 app.use(helmet()); // protection XSS
 app.use(cors()); // Cross-Origin Resource Sharing
