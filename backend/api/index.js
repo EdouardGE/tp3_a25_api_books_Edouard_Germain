@@ -1,5 +1,4 @@
-import app from "../app.mjs";
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 let cached = global._mongoose;
 if (!cached) cached = global._mongoose = { conn: null, promise: null };
@@ -20,12 +19,13 @@ async function dbConnect() {
   return cached.conn;
 }
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   try {
     await dbConnect();
+    const { default: app } = await import("../app.mjs");
     return app(req, res);
   } catch (err) {
-    console.error("DB connection error:", err);
-    return res.status(500).json({ message: "DB connection error" });
+    console.error(err);
+    return res.status(500).json({ message: "Server error" });
   }
-}
+};
