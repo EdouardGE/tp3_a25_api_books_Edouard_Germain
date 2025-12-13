@@ -18,7 +18,7 @@ import panierRoutes from './routes/panier.mjs';
 dotenvFlow.config();
 const app = express();
 
-const port = process.env.PORT ?? 3000;
+// const port = process.env.PORT ?? 3000;
 
 app.use(helmet()); // protection XSS
 app.use(cors()); // Cross-Origin Resource Sharing
@@ -92,16 +92,16 @@ app.use((_req, res, _next) => {
 /**
  * Connexion à MongoDB
  */
-mongooseConnect(process.env.MONGODB_URI ?? "mongodb://localhost:27017/etcaetera")
-	.then(() => {
-		console.log("Connexion à MongoDB réussie");
-		app.listen(port, () => {
-			console.log(`Serveur démarré sur le port ${port}`);
-		});
-	})
-	.catch((error) => {
-		console.error("Erreur de connexion à MongoDB:", error);
-		process.exit(1);
-	});
+//mongooseConnect(process.env.MONGODB_URI ?? "mongodb://localhost:27017/etcaetera")
+	//.then(() => {
+		//console.log("Connexion à MongoDB réussie");
+		//app.listen(port, () => {
+			//console.log(`Serveur démarré sur le port ${port}`);
+		//});
+	//})
+	//.catch((error) => {
+		//console.error("Erreur de connexion à MongoDB:", error);
+		//process.exit(1);
+	//});
 
-export default app;
+//export default app;
