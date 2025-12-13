@@ -41,10 +41,10 @@ export const useAuthStore = defineStore("auth", () => {
       body: JSON.stringify({ email, password })
     });
 
-    const result = await response.json();
+    const result = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-        throw result;
+      throw { status: response.status, ...result };
     }
 
     token.value = result.token
@@ -70,10 +70,10 @@ export const useAuthStore = defineStore("auth", () => {
       body: JSON.stringify(form)
     })
 
-    const result = await response.json();
+    const result = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-        throw result;
+      throw { status: response.status, ...result };
     }
 
     return result;

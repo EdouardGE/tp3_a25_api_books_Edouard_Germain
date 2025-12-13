@@ -41,11 +41,27 @@ async function login() {
     await auth.login(form.value.email, form.value.password)
     router.push({ name: "home" })
   } catch (error) {
-    const msg = error?.message || "Erreur inconnue"
+    const status = error?.status
 
-    if (/email/i.test(msg)) errors.email = msg
-    else if (/mot de passe|password/i.test(msg)) errors.password = msg
-    else errors.global = msg
+    if (status === 403) {
+      errors.global = "Accès refusé."
+      return
+    }
+
+    if (status === 400 || status === 422) {
+      const bag = error?.errors || {}
+      errors.email = bag.email?.[0] || errors.email
+      errors.password = bag.password?.[0] || errors.password
+      errors.global = error?.message || "Champs invalides."
+      return
+    }
+
+    if (status === 401) {
+      errors.global = error?.message || "Email ou mot de passe invalide."
+      return
+    }
+
+    errors.global = error?.message || "Erreur inconnue"
   } finally {
     loading.value = false
   }

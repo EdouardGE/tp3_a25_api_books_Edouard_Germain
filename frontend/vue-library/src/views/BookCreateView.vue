@@ -53,15 +53,38 @@ function applyApiErrors(err) {
   errors.global = err?.message || null
 }
 
+function handleHttpError(err, fallback = "Erreur.") {
+  const status = err?.status
+
+  if (status === 401) {
+    router.push({ name: 'login' })
+    return true
+  }
+
+  if (status === 403) {
+    router.push({ name: 'forbidden' })
+    return true
+  }
+
+  if (status === 404) {
+    router.push({ name: 'notfound' })
+    return true
+  }
+
+  errors.global = err?.message || fallback
+  return false
+}
+
 
 onMounted(async () => {
   try {
     const res = await fetch(`${API_URL}/api/auteurs`)
-    if (!res.ok) throw new Error("Impossible de charger les auteurs")
+    const data = await res.json().catch(() => null)
+    if (!res.ok) throw { status: res.status, ...(data || {}), message: data?.message || "Impossible de charger les auteurs" }
 
     auteursList.value = await res.json()
   } catch (err) {
-    errors.global = err?.message || "Erreur lors du chargement."
+    handleHttpError(err, err?.message || "Erreur lors du chargement.")
   }
 })
 
@@ -84,6 +107,7 @@ function validate() {
 
 async function createBook() {
     apiSuccess.value = null
+    resetErrors()
 
     if (!validate()) return
 
@@ -91,11 +115,14 @@ async function createBook() {
 
     try {
       await bookStore.addBook(form.value);
-
+      apiSuccess.value = "Livre ajouté avec succès."
       router.push({ name: 'home' })
-      apiSuccess.value = "Livre ajouté avec succès.";
     } catch (error) {
+      if (handleHttpError(err, "Erreur lors de l'ajout.")) return
       applyApiErrors(error)
+      if (err?.status === 409 && !errors.global) {
+        errors.global = err?.message || "Conflit : données déjà utilisées."
+      }
       if (!errors.global) errors.global = "Erreur lors de l'ajout."
     } finally {
       saving.value = false

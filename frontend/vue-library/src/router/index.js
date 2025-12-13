@@ -4,6 +4,8 @@ import LoginView from '@/views/LoginView.vue'
 import SignupView from '@/views/SignupView.vue'
 import ProfileView from '@/views/ProfileView.vue'
 import BookCreateView from '@/views/BookCreateView.vue'
+import ForbiddenView from '@/views/ForbiddenView.vue'
+import NotFoundView from '@/views/NotFoundView.vue'
 import CartView from '@/views/CartView.vue'
 import { useAuthStore } from '@/stores/auth'
 
@@ -36,7 +38,8 @@ const router = createRouter({
     {
       path: '/profile',
       name: 'profile',
-      component: ProfileView
+      component: ProfileView,
+      meta: { requiresAuth: true }
     },
     {
       path: '/panier',
@@ -50,6 +53,10 @@ const router = createRouter({
       component: BookCreateView,
       meta: { requiresAuth: true, requiresAdmin: true }
     },
+
+    { path: '/forbidden', name: 'forbidden', component: ForbiddenView },
+
+    { path: '/:pathMatch(.*)*', name: 'notfound', component: NotFoundView },
 
   ],
 })

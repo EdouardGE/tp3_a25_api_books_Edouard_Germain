@@ -9,8 +9,36 @@ const cartStore = useCartStore()
 const clearing = ref(false)
 const apiError = ref(null)
 
+function handleHttpError(err, fallback = "Erreur.") {
+  const status = err?.status
+
+  if (status === 401) {
+    auth.logout()
+    router.push({ name: 'login' })
+    return true
+  }
+
+  if (status === 403) {
+    router.push({ name: 'forbidden' })
+    return true
+  }
+
+  if (status === 404) {
+    router.push({ name: 'notfound' })
+    return true
+  }
+
+  apiError.value = err?.message || fallback
+  return false
+}
+
 onMounted(async () => {
-  try { await cartStore.fetchCart() } catch (e) {}
+  apiError.value = null
+  try {
+    await cartStore.fetchCart()
+  } catch (err) {
+    handleHttpError(err, "Impossible de charger le panier.")
+  }
 })
 
 async function clearAll() {
@@ -22,8 +50,8 @@ async function clearAll() {
   try {
     await cartStore.clearCart()
   } catch (e) {
-    apiError.value = e?.message || "Erreur lors du vidage du panier."
-  } finally {
+    handleHttpError(err, "Erreur lors du vidage du panier.")  }
+  finally {
     clearing.value = false
   }
 }

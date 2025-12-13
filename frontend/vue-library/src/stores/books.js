@@ -29,9 +29,8 @@ export const useBookStore = defineStore('books', () => {
         const result = await response.json();
 
         if (!response.ok) {
-            throw result;
+        throw { status: response.status, ...result };
         }
-
         books.value = result.data;
         pagination.value = result.pagination;
 
@@ -50,9 +49,7 @@ export const useBookStore = defineStore('books', () => {
         const response = await fetch(`${API_URL}/api/livres/search?q=${encodeURIComponent(q)}`);
         const result = await response.json();
 
-        if (!response.ok) {
-            throw result;
-        }
+        if (!response.ok) throw { status: response.status, ...result };
 
         books.value = result;
         return result;
@@ -62,7 +59,9 @@ export const useBookStore = defineStore('books', () => {
         const response = await fetch(`${API_URL}/api/livres/${id}`);
         const result = await response.json();
 
-        if (!response.ok) throw result;
+        if (!response.ok) {
+            throw { status: response.status, ...result };
+        }
 
         return result;
     }
@@ -80,7 +79,7 @@ export const useBookStore = defineStore('books', () => {
         const result = await response.json();
 
         if (!response.ok) {
-            throw result;
+        throw { status: response.status, ...result };
         }
 
         books.value.push(result);
@@ -99,7 +98,7 @@ export const useBookStore = defineStore('books', () => {
         const result = await response.json();
 
         if (!response.ok) {
-            throw result;
+        throw { status: response.status, ...result };
         }
 
         const index = books.value.findIndex(b => b.id === bookId);
@@ -121,7 +120,7 @@ export const useBookStore = defineStore('books', () => {
         const result = await response.json();
 
         if (!response.ok) {
-            throw result;
+        throw { status: response.status, ...result };
         }
 
         books.value = books.value.filter(b => b.id !== bookId);

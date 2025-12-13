@@ -18,7 +18,7 @@ export const useUserStore = defineStore('user', () => {
     const result = await response.json();
 
     if (!response.ok) {
-      throw result;
+      throw { status: response.status, ...result };
     }
 
     return result;
@@ -31,9 +31,8 @@ export const useUserStore = defineStore('user', () => {
      }
         });
         const result = await response.json();
-
         if (!response.ok) {
-            throw result;
+          throw { status: response.status, ...result };
         }
 
         users.value = result;
@@ -54,7 +53,7 @@ export const useUserStore = defineStore('user', () => {
       const result = await response.json();
 
       if (!response.ok) {
-        throw result;
+        throw { status: response.status, ...result };
       }
 
       if (userId) {
@@ -83,7 +82,7 @@ export const useUserStore = defineStore('user', () => {
         const result = await response.json();
 
         if (!response.ok) {
-            throw result;
+          throw { status: response.status, ...result };
         }
         return result;
     }

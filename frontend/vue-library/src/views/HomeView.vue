@@ -12,6 +12,17 @@ const isSearching = ref(false);
 const search = ref("");
 const selectedCategory = ref("")
 
+function handleHttpError(err, fallback = "Erreur.") {
+  const status = err?.status
+
+  if (status === 401) { router.push({ name: "login" }); return true }
+  if (status === 403) { router.push({ name: "forbidden" }); return true }
+  if (status === 404) { router.push({ name: "notfound" }); return true }
+
+  apiError.value = err?.message || fallback
+  return false
+}
+
 async function changePage(newPage) {
   if (newPage < 1 || newPage > bookStore.totalPages) return;
 
@@ -21,7 +32,7 @@ async function changePage(newPage) {
   try {
       await bookStore.fetchBooks(newPage, bookStore.pageSize);
   } catch (error) {
-      apiError.value = error?.message || "Impossible de charger les livres.";
+      handleHttpError(error, "Impossible de charger les livres.")
   } finally {
       loading.value = false;
   }
@@ -31,7 +42,7 @@ onMounted(async function () {
   try {
     await bookStore.fetchBooks(1, 4)
   } catch (error) {
-    apiError.value = error?.message || "Impossible de charger les livres.";
+      handleHttpError(error, "Impossible de charger les livres.")
   } finally {
     loading.value = false
   }
@@ -52,7 +63,7 @@ async function searchBooks(query) {
     await bookStore.searchBooks(q);
 
   } catch (error) {
-    apiError.value = error?.message || "Erreur lors de la recherche.";
+      handleHttpError(error, "Erreur lors de la recherche.")
   } finally {
     loading.value = false;
   }
@@ -131,7 +142,7 @@ function resetSearch() {
       />
     </div>
 
-    <nav v-if="!loading && !apiError && bookStore.totalPages > 1 && !isSearching">
+    <nav v-if="!loading && !apiError && bookStore.totalPages > 1 && !isSearching && !selectedCategory">
       <ul class="pagination justify-content-center">
         <li class="page-item" :class="{disabled: bookStore.currentPage === 1}">
           <button class="page-link" @click="changePage(bookStore.currentPage - 1)">Précédent</button>

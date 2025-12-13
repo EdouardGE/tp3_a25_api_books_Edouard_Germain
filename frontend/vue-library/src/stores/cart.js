@@ -26,8 +26,7 @@ export const useCartStore = defineStore('cart', () => {
 
         const result = await response.json();
         if (!response.ok) {
-            throw result;
-
+        throw { status: response.status, ...result };
         }
 
         cartItems.value = result;
@@ -47,9 +46,8 @@ export const useCartStore = defineStore('cart', () => {
         const result = await response.json();
 
         if (!response.ok) {
-            throw result;
+        throw { status: response.status, ...result };
         }
-
 
         cartItems.value = result;
         return result;
@@ -73,7 +71,7 @@ export const useCartStore = defineStore('cart', () => {
         const result = await response.json();
 
         if (!response.ok) {
-            throw result;
+        throw { status: response.status, ...result };
         }
 
         cartItems.value = result;
@@ -92,7 +90,7 @@ export const useCartStore = defineStore('cart', () => {
         const result = await response.json();
 
         if (!response.ok) {
-            throw result;
+        throw { status: response.status, ...result };
         }
 
         cartItems.value = result;

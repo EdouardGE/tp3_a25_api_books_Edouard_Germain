@@ -1,6 +1,6 @@
 <script setup>
 
-import { ref, onMounted, reactive, computed, watch } from 'vue'
+import { ref, onMounted, reactive } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { useAuthStore } from "@/stores/auth";
 import { useRouter } from 'vue-router'
@@ -74,6 +74,19 @@ function validate() {
   return !errors.first_name && !errors.last_name && !errors.email
 }
 
+async function handleHttpError(err, fallbackMsg = "Erreur.") {
+  const status = err?.status
+
+  if (status === 401) {
+    auth.logout()
+    return router.push({ name: 'login' })
+  }
+  if (status === 403) return router.push({ name: 'forbidden' })
+  if (status === 404) return router.push({ name: 'notfound' })
+
+  showToast({ type: 'error', message: err?.message || fallbackMsg })
+}
+
 
 onMounted(async function () {
   try {
@@ -104,7 +117,12 @@ async function updateProfile() {
       profile.value = updated;
       showToast({ type: 'success', message: "Profil mis à jour." })
     } catch (error) {
-      showToast({ type: 'error', message: error?.message || "Erreur lors de la mise à jour." })
+      if (err?.status === 400 || err?.status === 422) {
+            applyApiFieldErrors(err)
+            showToast({ type: 'error', message: "Corrige les erreurs." })
+          } else {
+            await handleHttpError(err, "Erreur lors de la mise à jour.")
+          }
     } finally {
       saving.value = false
     }

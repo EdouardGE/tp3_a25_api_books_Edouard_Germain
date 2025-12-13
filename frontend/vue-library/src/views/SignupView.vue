@@ -80,8 +80,29 @@ async function signup() {
 
     router.push({ name: 'login' })
   } catch (err) {
-    applyApiErrors(err)
-    if (!errors.global) errors.global = "Erreur lors de l'inscription."
+    if (err?.status === 401) {
+      auth.logout()
+      return router.push({ name: 'login' })
+    }
+
+    if (err?.status === 403) {
+      errors.global = err?.message || "Accès refusé."
+      return
+    }
+
+    if (err?.status === 409) {
+      applyApiErrors(err)
+      if (!errors.global) errors.global = err?.message || "Conflit : données déjà utilisées."
+      return
+    }
+
+    if (err?.status === 400 || err?.status === 422) {
+      applyApiErrors(err)
+      if (!errors.global) errors.global = "Corrige les champs en rouge."
+      return
+    }
+
+    errors.global = err?.message || "Erreur lors de l'inscription."
   } finally {
     loading.value = false
   }
