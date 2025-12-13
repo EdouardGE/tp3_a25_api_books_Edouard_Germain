@@ -11,9 +11,11 @@ export const useCartStore = defineStore('cart', () => {
     const items = computed(() => cartItems.value?.items ?? []);
     const total = computed(() => cartItems.value?.total ?? 0);
 
+
     const totalQuantity = computed(() =>
         items.value.reduce((sum, item) => sum + item.quantite, 0)
     );
+
 
     async function fetchCart() {
         const response = await fetch(`${API_URL}/api/panier`, {

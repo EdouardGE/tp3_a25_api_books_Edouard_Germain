@@ -22,6 +22,8 @@ export const useBookStore = defineStore('books', () => {
 
 
 
+
+
     async function fetchBooks(page = 1, limit = 4) {
         const response = await fetch(`${API_URL}/api/livres?page=${page}&limit=${limit}`);
         const result = await response.json();
