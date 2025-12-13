@@ -104,4 +104,4 @@ app.use((_req, res, _next) => {
 		//process.exit(1);
 	//});
 
-//export default app;
+export default app;
