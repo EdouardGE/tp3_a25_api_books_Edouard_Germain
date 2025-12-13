@@ -89,19 +89,5 @@ app.use((_req, res, _next) => {
 	res.status(404).json({ message: "Route ou ressource introuvable" });
 });
 
-/**
- * Connexion à MongoDB
- */
-//mongooseConnect(process.env.MONGODB_URI ?? "mongodb://localhost:27017/etcaetera")
-	//.then(() => {
-		//console.log("Connexion à MongoDB réussie");
-		//app.listen(port, () => {
-			//console.log(`Serveur démarré sur le port ${port}`);
-		//});
-	//})
-	//.catch((error) => {
-		//console.error("Erreur de connexion à MongoDB:", error);
-		//process.exit(1);
-	//});
 
 export default app;

@@ -6,12 +6,10 @@ if (!cached) cached = global._mongoose = { conn: null, promise: null };
 async function dbConnect() {
   if (cached.conn) return cached.conn;
 
-  if (!cached.promise) {
-    const uri =
-      process.env.MONGODB_URI ??
-      process.env.MONGO_URI ??
-      "mongodb://localhost:27017/etcaetera";
+  const uri = process.env.MONGODB_URI ?? process.env.MONGO_URI;
+  if (!uri) throw new Error("Missing MONGODB_URI (or MONGO_URI) env var");
 
+  if (!cached.promise) {
     cached.promise = mongoose.connect(uri).then((m) => m);
   }
 
@@ -26,6 +24,9 @@ module.exports = async (req, res) => {
     return app(req, res);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: "Server error" });
+    return res.status(500).json({
+      message: "Server error",
+      error: err.message,
+    });
   }
 };
