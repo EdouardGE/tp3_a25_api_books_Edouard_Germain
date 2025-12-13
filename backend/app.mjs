@@ -103,4 +103,4 @@ mongooseConnect(process.env.MONGODB_URI ?? 'mongodb://localhost:27017/etcaetera'
         process.exit(1);
     });
 
-module.exports = app;
+export default app;
