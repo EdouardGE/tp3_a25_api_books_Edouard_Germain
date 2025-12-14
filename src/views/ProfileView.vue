@@ -5,11 +5,9 @@ import { useUserStore } from '@/stores/user'
 import { useAuthStore } from "@/stores/auth";
 import { useRouter } from 'vue-router'
 
-
 const userStore = useUserStore()
 const auth = useAuthStore();
 const router = useRouter()
-
 
 const profile = ref(null)
 const loading = ref(true)
@@ -24,6 +22,7 @@ const toast = reactive({
   timeoutId: null
 })
 
+/* Affiche une notification temporaire (toast) */
 function showToast({ type = 'info', message, actionText = null, action = null, duration = 3500 } = {}) {
   if (toast.timeoutId) clearTimeout(toast.timeoutId)
 
@@ -42,6 +41,7 @@ function showToast({ type = 'info', message, actionText = null, action = null, d
   }
 }
 
+/* Ferme immédiatement la notification */
 function closeToast() {
   if (toast.timeoutId) clearTimeout(toast.timeoutId)
   toast.show = false
@@ -55,12 +55,14 @@ const errors = reactive({
   email: null
 })
 
+/* Réinitialise les erreurs du formulaire */
 function resetErrors() {
   errors.first_name = null
   errors.last_name = null
   errors.email = null
 }
 
+/* Valide les champs du profil utilisateur */
 function validate() {
   resetErrors()
 
@@ -74,6 +76,7 @@ function validate() {
   return !errors.first_name && !errors.last_name && !errors.email
 }
 
+/* Gère les erreurs HTTP et redirige selon le statut */
 async function handleHttpError(err, fallbackMsg = "Erreur.") {
   const status = err?.status
 
@@ -87,7 +90,7 @@ async function handleHttpError(err, fallbackMsg = "Erreur.") {
   showToast({ type: 'error', message: err?.message || fallbackMsg })
 }
 
-
+/* Charge le profil de l’utilisateur */
 onMounted(async function () {
   try {
     const data = await userStore.fetchProfile()
@@ -99,35 +102,37 @@ onMounted(async function () {
   }
 })
 
+/* Met à jour les informations du profil utilisateur */
 async function updateProfile() {
-    if (!validate()) {
-      showToast({ type: 'error', message: "Corrige les champs en rouge." })
-      return
-    }
+  if (!validate()) {
+    showToast({ type: 'error', message: "Corrige les champs en rouge." })
+    return
+  }
 
-    saving.value = true;
+  saving.value = true;
 
-    try {
-      const updated = await userStore.updateUser(null, {
-        first_name: profile.value.first_name,
-        last_name: profile.value.last_name,
-        email: profile.value.email
-      });
+  try {
+    const updated = await userStore.updateUser(null, {
+      first_name: profile.value.first_name,
+      last_name: profile.value.last_name,
+      email: profile.value.email
+    });
 
-      profile.value = updated;
-      showToast({ type: 'success', message: "Profil mis à jour." })
-    } catch (error) {
-      if (err?.status === 400 || err?.status === 422) {
-            applyApiFieldErrors(err)
-            showToast({ type: 'error', message: "Corrige les erreurs." })
-          } else {
-            await handleHttpError(err, "Erreur lors de la mise à jour.")
-          }
-    } finally {
-      saving.value = false
-    }
+    profile.value = updated;
+    showToast({ type: 'success', message: "Profil mis à jour." })
+  } catch (error) {
+    if (err?.status === 400 || err?.status === 422) {
+          applyApiFieldErrors(err)
+          showToast({ type: 'error', message: "Corrige les erreurs." })
+        } else {
+          await handleHttpError(err, "Erreur lors de la mise à jour.")
+        }
+  } finally {
+    saving.value = false
+  }
 }
 
+/* Supprime définitivement le compte utilisateur */
 async function reallyDeleteAccount() {
   saving.value = true
   try {
@@ -142,6 +147,7 @@ async function reallyDeleteAccount() {
   }
 }
 
+/* Demande confirmation avant suppression du compte */
 function deleteAccount() {
   showToast({
     type: 'warning',
