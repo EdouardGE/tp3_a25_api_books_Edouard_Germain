@@ -1,0 +1,1905 @@
+{
+	"info": {
+		"_postman_id": "1aed748c-372a-41f1-8c35-6628115f5248",
+		"name": "TP3_A25",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "48829020",
+		"_collection_link": "https://edougermain05-684839.postman.co/workspace/d777f7b1-3599-4c93-8ce0-88b94bde04a5/collection/48829020-1aed748c-372a-41f1-8c35-6628115f5248?action=share&source=collection_link&creator=48829020"
+	},
+	"item": [
+		{
+			"name": "Seed Database (setup)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/db/seed",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"db",
+						"seed"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 200 - Connexion réussie\", () => {\r",
+							"  pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"let json = {};\r",
+							"pm.test(\"Réponse JSON valide\", () => {\r",
+							"  json = pm.response.json();\r",
+							"  pm.expect(json).to.be.an(\"object\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Réponse contient un token JWT\", () => {\r",
+							"  pm.expect(json).to.have.property(\"token\");\r",
+							"  pm.expect(json.token).to.be.a(\"string\").and.not.empty;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Token ressemble à un JWT\", () => {\r",
+							"  const parts = json.token.split(\".\");\r",
+							"  pm.expect(parts.length).to.equal(3);\r",
+							"});\r",
+							"\r",
+							"pm.collectionVariables.set(\"userToken\", json.token);\r",
+							"\r",
+							"pm.test(\"Token sauvegardé en variable de collection\", () => {\r",
+							"  pm.expect(pm.collectionVariables.get(\"userToken\")).to.be.a(\"string\").and.not.empty;\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"user2@cegep.ca\",\r\n  \"password\": \"123123\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/auth/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Non-existent Login (invalid username)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 404 - Username innexistant\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							"\r",
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"La réponse contient un message d'erreur\", function () {\r",
+							"    pm.expect(json).to.have.property(\"message\");\r",
+							"    pm.expect(json.message).to.be.a(\"string\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Le message confirme l'erreur\", function () {\r",
+							"    pm.expect(json.message.toLowerCase()).to.include(\"utilisateur non trouvé\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"\",\r\n    \"password\": \"124446\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/auth/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Non-existent Login (invalid password)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 401 - Mot de passe invalide\", function () {\r",
+							"    pm.expect([400, 401]).to.include(pm.response.code);\r",
+							"});\r",
+							"\r",
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"La réponse contient un message d'erreur\", function () {\r",
+							"    pm.expect(json).to.have.property(\"message\");\r",
+							"    pm.expect(json.message).to.be.a(\"string\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Le message confirme l'erreur\", function () {\r",
+							"    const msg = json.message.toLowerCase();\r",
+							"    pm.expect(\r",
+							"        msg.includes(\"mot de passe\") ||\r",
+							"        msg.includes(\"password\") ||\r",
+							"        msg.includes(\"identifiants\") ||\r",
+							"        msg.includes(\"incorrect\") ||\r",
+							"        msg.includes(\"invalide\") ||\r",
+							"        msg.includes(\"invalid\")\r",
+							"    ).to.be.true;\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"user2@cegep.ca\",\r\n    \"password\": \"\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/auth/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Book",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 200\", function () {\r",
+							"  pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const livres = pm.response.json().data; //\r",
+							"pm.collectionVariables.set(\"livreId\", livres[0]._id);\r",
+							"\r",
+							"pm.test(\"livreId sauvegardé\", function () {\r",
+							"  pm.expect(pm.collectionVariables.get(\"livreId\")).to.exist;\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{userToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/livres?page=1&limit=10",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"livres"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "limit",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Signup",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 201 - Inscription réussie\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Réponse contient un message\", function () {\r",
+							"    pm.expect(json).to.have.property(\"message\");\r",
+							"    pm.expect(json.message).to.be.a(\"string\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Le message confirme la création\", function () {\r",
+							"    pm.expect(json.message.toLowerCase()).to.include(\"créé\");\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"userTest\",\r\n    \"password\": \"123446\",\r\n    \"first_name\": \"user\",\r\n    \"last_name\": \"name\",\r\n    \"email\": \"userTest@cegep.ca\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/auth/signup",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"auth",
+						"signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Signup Duplicate Email (invalid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 409 - Email existe déjà\", function () {\r",
+							"  pm.response.to.have.status(409);\r",
+							"});\r",
+							"\r",
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"La réponse contient un message d'erreur\", function () {\r",
+							"  pm.expect(json).to.have.property(\"message\");\r",
+							"  pm.expect(json.message).to.be.a(\"string\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Le message confirme l'erreur (username déjà utilisé)\", function () {\r",
+							"  const msg = json.message.toLowerCase();\r",
+							"  pm.expect(\r",
+							"    msg.includes(\"email\") &&\r",
+							"    (msg.includes(\"existe\") || msg.includes(\"déjà\") || msg.includes(\"utilisé\") || msg.includes(\"duplicate\"))\r",
+							"  ).to.be.true;\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"new\",\r\n    \"password\": \"123446\",\r\n    \"first_name\": \"user\",\r\n    \"last_name\": \"name\",\r\n    \"email\": \"userTest@cegep.ca\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/auth/signup",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"auth",
+						"signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Signup Duplicate Username (invalid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 409 - Username existe déjà\", function () {\r",
+							"    pm.expect([400, 409]).to.include(pm.response.code);\r",
+							"});\r",
+							"\r",
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"La réponse contient un message d'erreur\", function () {\r",
+							"    pm.expect(json).to.have.property(\"message\");\r",
+							"    pm.expect(json.message).to.be.a(\"string\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Le message confirme l'erreur\", function () {\r",
+							"    const msg = (json.message || \"\").toLowerCase();\r",
+							"    const bag = JSON.stringify(json.errors || {}).toLowerCase();\r",
+							"\r",
+							"    const full = msg + \" \" + bag;\r",
+							"\r",
+							"    pm.expect(\r",
+							"        full.includes(\"username\") ||\r",
+							"        full.includes(\"nom d'utilisateur\") ||\r",
+							"        full.includes(\"utilisateur\") ||\r",
+							"        full.includes(\"déjà\") ||\r",
+							"        full.includes(\"existe\") ||\r",
+							"        full.includes(\"duplicate\") ||\r",
+							"        full.includes(\"already\")\r",
+							"    ).to.be.true;\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"userTest\",\r\n    \"password\": \"123446\",\r\n    \"first_name\": \"user\",\r\n    \"last_name\": \"name\",\r\n    \"email\": \"random@gmail.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/auth/signup",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"auth",
+						"signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Signup Too Short Password (invalid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 400 - Mot de passe trop court\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"La réponse contient un message d'erreur\", function () {\r",
+							"    pm.expect(json).to.have.property(\"message\");\r",
+							"    pm.expect(json.message).to.be.a(\"string\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Le message confirme l'erreur\", function () {\r",
+							"    pm.expect(json.message.toLowerCase()).to.include(\"le mot de passe doit contenir au moins 6 caractères\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"userxaaaAcaaaax\",\r\n    \"password\": \"12446\",\r\n    \"first_name\": \"user\",\r\n    \"last_name\": \"name\",\r\n    \"email\": \"usersssaaaaaaaaaaY@cegep.ca\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/auth/signup",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"auth",
+						"signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Signup Blank Username (invalid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 422 - Champ (username) vide\", function () {\r",
+							"    pm.response.to.have.status(422);\r",
+							"});\r",
+							"\r",
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"La réponse contient un message d'erreur\", function () {\r",
+							"    pm.expect(json).to.have.property(\"message\");\r",
+							"    pm.expect(json.message).to.be.a(\"string\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Le message confirme l'erreur\", function () {\r",
+							"    pm.expect(json).to.have.property(\"errors\");\r",
+							"\r",
+							"    const errors = json.errors;\r",
+							"\r",
+							"    pm.expect(errors).to.have.property(\"username\");\r",
+							"    pm.expect(errors.username.toLowerCase()).to.include(\"le champ `pseudo` est requis\");\r",
+							"    pm.expect(errors.username).to.be.a(\"string\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"\",\r\n    \"password\": \"124446\",\r\n    \"first_name\": \"user\",\r\n    \"last_name\": \"name\",\r\n    \"email\": \"usersssaaaaaaaaaaY@cegep.ca\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/auth/signup",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"auth",
+						"signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Signup Blank First Name (invalid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 422 - Champ (first_name) vide\", function () {\r",
+							"    pm.response.to.have.status(422);\r",
+							"});\r",
+							"\r",
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"La réponse contient un message d'erreur\", function () {\r",
+							"    pm.expect(json).to.have.property(\"message\");\r",
+							"    pm.expect(json.message).to.be.a(\"string\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Le message confirme l'erreur\", function () {\r",
+							"    pm.expect(json).to.have.property(\"errors\");\r",
+							"\r",
+							"    const errors = json.errors;\r",
+							"\r",
+							"    pm.expect(errors).to.have.property(\"first_name\");\r",
+							"    pm.expect(errors.first_name.toLowerCase()).to.include(\"le `prénom` doit contenir au moins 1 caractère\");\r",
+							"    pm.expect(errors.first_name).to.be.a(\"string\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"hey\",\r\n    \"password\": \"124446\",\r\n    \"first_name\": \"\",\r\n    \"last_name\": \"name\",\r\n    \"email\": \"usersssaaaaaaaaaaY@cegep.ca\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/auth/signup",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"auth",
+						"signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Signup Blank Last Name (invalid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 422 - Champ (last_name) vide\", function () {\r",
+							"    pm.response.to.have.status(422);\r",
+							"});\r",
+							"\r",
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"La réponse contient un message d'erreur\", function () {\r",
+							"    pm.expect(json).to.have.property(\"message\");\r",
+							"    pm.expect(json.message).to.be.a(\"string\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Le message confirme l'erreur\", function () {\r",
+							"    pm.expect(json).to.have.property(\"errors\");\r",
+							"\r",
+							"    const errors = json.errors;\r",
+							"\r",
+							"    pm.expect(errors).to.have.property(\"last_name\");\r",
+							"    pm.expect(errors.last_name.toLowerCase()).to.include(\"le `nom` doit contenir au moins 1 caractère\");\r",
+							"    pm.expect(errors.last_name).to.be.a(\"string\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"hey\",\r\n    \"password\": \"124446\",\r\n    \"first_name\": \"xxx\",\r\n    \"last_name\": \"\",\r\n    \"email\": \"usersssaaaaaaaaaaY@cegep.ca\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/auth/signup",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"auth",
+						"signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Signup Blank Email (invalid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 422 - Champ (email) vide\", function () {\r",
+							"    pm.response.to.have.status(422);\r",
+							"});\r",
+							"\r",
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"La réponse contient un message d'erreur\", function () {\r",
+							"    pm.expect(json).to.have.property(\"message\");\r",
+							"    pm.expect(json.message).to.be.a(\"string\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Le message confirme l'erreur\", function () {\r",
+							"    pm.expect(json).to.have.property(\"errors\");\r",
+							"\r",
+							"    const errors = json.errors;\r",
+							"\r",
+							"    pm.expect(errors).to.have.property(\"email\");\r",
+							"    pm.expect(errors.email.toLowerCase()).to.include(\"le champ `courriel` est requis\");\r",
+							"    pm.expect(errors.email).to.be.a(\"string\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"hey\",\r\n    \"password\": \"124446\",\r\n    \"first_name\": \"xxx\",\r\n    \"last_name\": \"yyy\",\r\n    \"email\": \"\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/auth/signup",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"auth",
+						"signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Signup Wrong Email (invalid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 422 - Email invalide\", function () {\r",
+							"    pm.response.to.have.status(422);\r",
+							"});\r",
+							"\r",
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"La réponse contient un message d'erreur\", function () {\r",
+							"    pm.expect(json).to.have.property(\"message\");\r",
+							"    pm.expect(json.message).to.be.a(\"string\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Erreur de validation sur le champ email\", function () {\r",
+							"    pm.expect(json).to.have.property(\"errors\");\r",
+							"    pm.expect(json.errors).to.have.property(\"email\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"hey\",\r\n    \"password\": \"124446\",\r\n    \"first_name\": \"xxx\",\r\n    \"last_name\": \"yyy\",\r\n    \"email\": \"cegepgarbeaugmail.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/auth/signup",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"auth",
+						"signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Cart",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 200 - Panier récupéré (ou 401 si token invalide)\", function () {\r",
+							"    pm.expect([200, 401]).to.include(pm.response.code);\r",
+							"});\r",
+							"\r",
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Réponse contient un objet JSON\", function () {\r",
+							"    pm.expect(json).to.be.an(\"object\");\r",
+							"});\r",
+							"\r",
+							"if (pm.response.code === 200) {\r",
+							"\r",
+							"    pm.test(\"Le panier contient items et total\", function () {\r",
+							"        pm.expect(json).to.have.property(\"items\");\r",
+							"        pm.expect(json.items).to.be.an(\"array\");\r",
+							"\r",
+							"        pm.expect(json).to.have.property(\"total\");\r",
+							"        pm.expect(json.total).to.be.a(\"number\");\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Chaque item a livre + quantite\", function () {\r",
+							"        if (json.items.length === 0) return;\r",
+							"\r",
+							"        const it = json.items[0];\r",
+							"        pm.expect(it).to.have.property(\"quantite\");\r",
+							"        pm.expect(it.quantite).to.be.a(\"number\");\r",
+							"\r",
+							"        pm.expect(it).to.have.property(\"livre\");\r",
+							"        pm.expect(it.livre).to.be.an(\"object\");\r",
+							"        pm.expect(it.livre).to.have.property(\"_id\");\r",
+							"    });\r",
+							"\r",
+							"} else {\r",
+							"\r",
+							"    pm.test(\"Erreur 401 contient un message\", function () {\r",
+							"        pm.expect(json).to.have.property(\"message\");\r",
+							"        pm.expect(json.message).to.be.a(\"string\");\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Message indique un problème de token\", function () {\r",
+							"        pm.expect(json.message.toLowerCase()).to.include(\"token\");\r",
+							"    });\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{userToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/panier",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"panier"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add to Cart",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 200 - Ajout/MAJ panier OK\", function () {\r",
+							"  pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Réponse contient items et total\", function () {\r",
+							"  pm.expect(json).to.have.property(\"items\");\r",
+							"  pm.expect(json.items).to.be.an(\"array\");\r",
+							"  pm.expect(json).to.have.property(\"total\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{userToken}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"livreId\": \"{{livreId}}\", \"quantite\": 1 }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/panier",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"panier"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add to Cart Non-existent (invalid ID)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 422 - Identifiant invalide\", function () {\r",
+							"\r",
+							"    pm.response.to.have.status(422);\r",
+							"});\r",
+							"\r",
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"La réponse contient un message d'erreur\", function () {\r",
+							"    pm.expect(json).to.have.property(\"message\");\r",
+							"    pm.expect(json.message).to.be.a(\"string\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Le message confirme l'erreur\", function () {\r",
+							"    pm.expect(json.message.toLowerCase()).to.include(\"identifiant invalide!\");\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							"pm.sendRequest(\"http://localhost:3000/api/livres\", function (err, res) {\r",
+							"    if (err) {\r",
+							"        console.log(err);\r",
+							"    } else {\r",
+							"        const livres = res.json().data;\r",
+							"\r",
+							"        const randomIndex = Math.floor(Math.random() * livres.length);\r",
+							"\r",
+							"        const livre = livres[randomIndex];\r",
+							"\r",
+							"        pm.collectionVariables.set(\"livreId\", livre._id); \r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"livreId\": \"\",\r\n  \"quantite\": 5\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/panier",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"panier"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add to Cart - Non-existent Book (invalid ID)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 404 - Livre non trouvé\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							"\r",
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"La réponse contient un message d'erreur\", function () {\r",
+							"    pm.expect(json).to.have.property(\"message\");\r",
+							"    pm.expect(json.message).to.be.a(\"string\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Le message confirme l'erreur\", function () {\r",
+							"    pm.expect(json.message.toLowerCase()).to.include(\"livre non trouvé\");\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							"pm.sendRequest(\"http://localhost:3000/api/livres\", function (err, res) {\r",
+							"    if (err) {\r",
+							"        console.log(err);\r",
+							"    } else {\r",
+							"        const livres = res.json().data;\r",
+							"\r",
+							"        const randomIndex = Math.floor(Math.random() * livres.length);\r",
+							"\r",
+							"        const livre = livres[randomIndex];\r",
+							"\r",
+							"        pm.collectionVariables.set(\"livreId\", livre._id); \r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{userToken}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"livreId\": \"000000000000000000000000\",\r\n  \"quantite\": 5\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/panier",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"panier"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add to Cart With Negative or Zero Quantity (invalid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 400 - Quantité invalide\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"La réponse contient un message d'erreur\", function () {\r",
+							"    pm.expect(json).to.have.property(\"message\");\r",
+							"    pm.expect(json.message).to.be.a(\"string\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Le message confirme l'erreur de quantité\", function () {\r",
+							"    pm.expect(json.message.toLowerCase()).to.include(\"quantité\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							"pm.sendRequest(\"http://localhost:3000/api/livres\", function (err, res) {\r",
+							"    if (err) {\r",
+							"        console.log(err);\r",
+							"    } else {\r",
+							"        const livres = res.json().data;\r",
+							"\r",
+							"        const randomIndex = Math.floor(Math.random() * livres.length);\r",
+							"\r",
+							"        const livre = livres[randomIndex];\r",
+							"\r",
+							"        pm.collectionVariables.set(\"livreId\", livre._id); \r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{userToken}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"livreId\": \"6930ec9c96653ec6946f2419\",\r\n  \"quantite\": 0\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/panier",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"panier"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add to Cart With No Token (invalid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 401 - Token absent - Non autorisé\", function () {\r",
+							"    pm.response.to.have.status(401);\r",
+							"});\r",
+							"\r",
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"La réponse contient un message d'erreur\", function () {\r",
+							"    pm.expect(json).to.have.property(\"message\");\r",
+							"    pm.expect(json.message).to.be.a(\"string\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Le message confirme l'erreur\", function () {\r",
+							"    pm.expect(json.message.toLowerCase()).to.include(\"non autorisé, pas de token fourni.\");\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							"pm.sendRequest(\"http://localhost:3000/api/livres\", function (err, res) {\r",
+							"    if (err) {\r",
+							"        console.log(err);\r",
+							"    } else {\r",
+							"        const livres = res.json().data;\r",
+							"\r",
+							"        const randomIndex = Math.floor(Math.random() * livres.length);\r",
+							"\r",
+							"        const livre = livres[randomIndex];\r",
+							"\r",
+							"        pm.collectionVariables.set(\"livreId\", livre._id); \r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"livreId\": \"692e4fe0bd922da27c8e429e\",\r\n  \"quantite\": 6\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/panier",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"panier"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Clear Cart",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 200 - Le panier est vide\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const panier = pm.response.json();\r",
+							"\r",
+							"pm.test(\"La structure du panier est correcte\", function () {\r",
+							"    pm.expect(panier).to.have.property(\"_id\");\r",
+							"    pm.expect(panier).to.have.property(\"user\");\r",
+							"    pm.expect(panier).to.have.property(\"items\");\r",
+							"    pm.expect(panier).to.have.property(\"total\");\r",
+							"    pm.expect(panier).to.have.property(\"createdAt\");\r",
+							"    pm.expect(panier).to.have.property(\"updatedAt\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Le panier est bien vide\", function () {\r",
+							"    pm.expect(panier.items).to.be.an(\"array\");\r",
+							"    pm.expect(panier.items.length).to.eql(0);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Le total est 0\", function () {\r",
+							"    pm.expect(panier.total).to.eql(0);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{userToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/panier",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"panier"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Clear Cart With No Token (invalid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 401 - Token absent - Non autorisé\", function () {\r",
+							"    pm.response.to.have.status(401);\r",
+							"});\r",
+							"\r",
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"La réponse contient un message d'erreur\", function () {\r",
+							"    pm.expect(json).to.have.property(\"message\");\r",
+							"    pm.expect(json.message).to.be.a(\"string\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Le message confirme l'erreur\", function () {\r",
+							"    pm.expect(json.message.toLowerCase()).to.include(\"non autorisé, pas de token fourni.\");\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{userToken}}",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/panier",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"panier"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Remove Item From Cart",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 200 (supprimé) ou 404 (absent)\", function () {\r",
+							"    pm.expect([200, 404]).to.include(pm.response.code);\r",
+							"});\r",
+							"\r",
+							"const json = pm.response.json();\r",
+							"\r",
+							"if (pm.response.code === 200) {\r",
+							"\r",
+							"    pm.test(\"La réponse contient items et total\", function () {\r",
+							"        pm.expect(json).to.have.property(\"items\");\r",
+							"        pm.expect(json.items).to.be.an(\"array\");\r",
+							"        pm.expect(json).to.have.property(\"total\");\r",
+							"        pm.expect(json.total).to.be.a(\"number\");\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Le livre n'est plus dans le panier\", function () {\r",
+							"        const livreId = pm.collectionVariables.get(\"livreId\") || pm.variables.get(\"livreId\");\r",
+							"        const found = json.items.some(i => (i.livre?._id || i.livre) == livreId);\r",
+							"        pm.expect(found).to.eql(false);\r",
+							"    });\r",
+							"\r",
+							"} else {\r",
+							"\r",
+							"    pm.test(\"La réponse contient un message d'erreur\", function () {\r",
+							"        pm.expect(json).to.have.property(\"message\");\r",
+							"        pm.expect(json.message).to.be.a(\"string\");\r",
+							"    });\r",
+							"\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{userToken}}",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{livreId}}",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"livreId\": \"{{livreId}}\", \"quantite\": 1 }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/panier/items/{{livreId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"panier",
+						"items",
+						"{{livreId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Remove Cart Item With No Token (invalid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 401 - Token absent - Non autorisé\", function () {\r",
+							"    pm.response.to.have.status(401);\r",
+							"});\r",
+							"\r",
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"La réponse contient un message d'erreur\", function () {\r",
+							"    pm.expect(json).to.have.property(\"message\");\r",
+							"    pm.expect(json.message).to.be.a(\"string\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Le message confirme l'erreur\", function () {\r",
+							"    pm.expect(json.message.toLowerCase()).to.include(\"non autorisé, le token a échoué.\");\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{livreId}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/panier/items/{{livreId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"panier",
+						"items",
+						"{{livreId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Remove Cart Item Non-existent (invalid ID)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 422 - Identifiant invalide\", function () {\r",
+							"    pm.response.to.have.status(422);\r",
+							"});\r",
+							"\r",
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"La réponse contient un message d'erreur\", function () {\r",
+							"    pm.expect(json).to.have.property(\"message\");\r",
+							"    pm.expect(json.message).to.be.a(\"string\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Le message confirme l'erreur\", function () {\r",
+							"    pm.expect(json.message.toLowerCase()).to.include(\"identifiant invalide\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{userToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/panier/items/123",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"panier",
+						"items",
+						"123"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Remove Cart Item (Valid ID but Non-existent Item) (invalid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 404 - Article non trouvé dans le panier (id valide)\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							"\r",
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"La réponse contient un message d'erreur\", function () {\r",
+							"    pm.expect(json).to.have.property(\"message\");\r",
+							"    pm.expect(json.message).to.be.a(\"string\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Le message confirme l'erreur\", function () {\r",
+							"    pm.expect(json.message.toLowerCase()).to.include(\"non trouvé\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{userToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/panier/items/000000000000000000000000",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"panier",
+						"items",
+						"000000000000000000000000"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Seed Database (reset)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/db/seed",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"db",
+						"seed"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "token",
+			"value": ""
+		},
+		{
+			"key": "livreId",
+			"value": ""
+		},
+		{
+			"key": "userToken",
+			"value": ""
+		}
+	]
+}
