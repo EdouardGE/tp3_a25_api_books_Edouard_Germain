@@ -1,0 +1,101 @@
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+import { useAuthStore } from './auth'
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+export const useUserStore = defineStore('user', () => {
+  const authStore = useAuthStore()
+  const users = ref([])
+
+  // Récupère le profil de l'utilisateur connecté
+  async function fetchProfile() {
+    const response = await fetch(`${API_URL}/api/users/profile`, {
+      headers: {
+        ...authStore.authHeaders
+      }
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw { status: response.status, ...result };
+    }
+
+    return result;
+  }
+
+  // Récupère la liste de tous les utilisateurs (admin)
+  async function fetchUsers() {
+    const response = await fetch(`${API_URL}/api/users`, {
+      headers: {
+        ...authStore.authHeaders
+      }
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      throw { status: response.status, ...result };
+    }
+
+    users.value = result;
+    return result;
+  }
+
+  // Met à jour un utilisateur (profil ou utilisateur spécifique)
+  async function updateUser(userId, updatedData) {
+    const endpoint = userId ? `${API_URL}/api/users/${userId}` : `${API_URL}/api/users/profile`
+    const response = await fetch(endpoint, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+          ...authStore.authHeaders
+      },
+      body: JSON.stringify(updatedData)
+    })
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw { status: response.status, ...result };
+    }
+
+    if (userId) {
+      const index = users.value.findIndex(u => u._id === userId)
+      if (index !== -1) users.value[index] = result
+    }
+    return result
+  }
+
+  // Supprime un utilisateur (profil ou utilisateur spécifique)
+  async function deleteUser(userId = null) {
+    const endpoint = userId ? `${API_URL}/api/users/${userId}` : `${API_URL}/api/users/profile`
+    const response = await fetch(endpoint, {
+        method: 'DELETE',
+        headers: {
+            ...authStore.authHeaders
+        }
+    });
+
+    if (response.status === 204) {
+      if (userId) {
+        users.value = users.value.filter(u => u._id !== userId)
+      }
+      return true
+    }
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw { status: response.status, ...result };
+    }
+    return result;
+  }
+
+  return {
+    users,
+    fetchProfile,
+    fetchUsers,
+    updateUser,
+    deleteUser
+  }
+})
